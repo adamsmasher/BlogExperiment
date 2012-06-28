@@ -16,7 +16,7 @@ trait FCGIHandler {
         val req = new FCGIRequest(
           HTTPRequestMethodParser.fromString(
             System.getProperty("REQUEST_METHOD")),
-            System.getProperty("PATH_INFO"),
+            System.getProperty("SCRIPT_NAME"),
             parseQueryString(System.getProperty("QUERY_STRING")));
         accepted = false;
         return req;
@@ -44,24 +44,61 @@ trait FCGIHandler {
 }
 
 class FCGIRequest(requestMethod:HTTPRequestMethod,
-                  pathInfo:String,
+                  scriptName:String,
                   queryString:Map[String, String]) {
   def dispatch(handlers: PartialFunction[String, FCGIRequest => HTTPResponse])
     : HTTPResponse =
   {
-    if(handlers isDefinedAt this.pathInfo)
-      handlers(this.pathInfo)(this);
+    if(handlers isDefinedAt this.scriptName)
+      handlers(this.scriptName)(this);
     else
-      return HTTP404Response;
+      return new HTTPResponse(
+	HTMLMIME,
+	Array(HTTPStatusHeader(HTTP404Status)),
+	"");
   }
 }
 
-abstract class HTTPResponse;
-case object HTTP404Response extends HTTPResponse {
+class HTTPResponse(contentType: MIMEType,
+		   additionalHeaders: Array[HTTPHeader],
+		   body: String)
+{
   override def toString() : String = {
-    return "Status: 404 Not Found\n"
-           "Content-type: text/html\n"
-           "Content-Length: 0\n\n";
+    return (contentType.toString() + "\n" +
+            additionalHeaders.mkString("\n") + "\n" +
+            body);
+  }
+}
+
+abstract class HTTPHeader {
+  def name() : String;
+  def value() : String;
+  override def toString() : String = {
+    return name() + ":" + value();
+  }
+}
+
+case class HTTPStatusHeader(status: HTTPStatus)
+     extends HTTPHeader
+{
+  override def name() : String = { return "Status" };
+  override def value() : String = { return status.toString(); }
+}
+
+abstract class HTTPStatus;
+case object HTTP404Status extends HTTPStatus {
+  override def toString() : String = { return "404 Not Found"; }
+}
+case object HTTP200Status extends HTTPStatus {
+  override def toString() : String = { return "200 OK" }
+}
+
+case class HTTPContentTypeHeader(contentType: MIMEType)
+	 extends HTTPHeader
+{
+  override def name() : String = { return "Content-type"; }
+  override def value() : String = {
+    return contentType.toString();
   }
 }
 
@@ -82,10 +119,20 @@ object HTTPRequestMethodParser {
 }
 
 abstract class MIMEType;
-case object JSONMIME extends MIMEType;
-case object HTMLMIME extends MIMEType;
-case object JavascriptMIME extends MIMEType;
-case object XMLMime extends MIMEType;
+case object JSONMIME extends MIMEType {
+  override def toString() : String = { return "application/json"; }
+}
+case object HTMLMIME extends MIMEType {
+  override def toString() : String = { return "text/html"; }
+}
+case object JavascriptMIME extends MIMEType {
+  override def toString() : String = {
+    return "application/javascript";
+  }
+}
+case object XMLMime extends MIMEType {
+  override def toString() : String = { return "text/xml"; }
+}
 
 object MIMETypeParser {
   def fromString(s:String) : MIMEType = {

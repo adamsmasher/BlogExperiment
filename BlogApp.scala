@@ -3,15 +3,17 @@ object BlogApp extends FCGIHandler {
     init();
     for(req <- get_request()) {
       val response = req dispatch {
-        case "/(index)?" => index
+        case "/index" => index
       }
-
       System.out.println(response);
     }
   }
 
   def index(req: FCGIRequest): HTTPResponse = {
-    return HTTP404Response;
+    return new HTTPResponse(
+      HTMLMIME,
+      Array(),
+      "<HTML>Hello World!</HTML>");
   }
 
   def init() = {}
