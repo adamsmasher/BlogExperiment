@@ -46,27 +46,16 @@ trait FCGIHandler {
 class FCGIRequest(requestMethod:HTTPRequestMethod,
                   scriptName:String,
                   queryString:Map[String, String]) {
-  def dispatch(handlers: PartialFunction[String, FCGIRequest => HTTPResponse])
+  def dispatch(handlers: Map[String, FCGIRequest => HTTPResponse])
     : HTTPResponse =
   {
-    if(handlers isDefinedAt this.scriptName)
-      handlers(this.scriptName)(this);
-    else
-      return new HTTPResponse(
-	HTMLMIME,
-	Array(HTTPStatusHeader(HTTP404Status)),
-	"");
-  }
-}
-
-class HTTPResponse(contentType: MIMEType,
-		   additionalHeaders: Array[HTTPHeader],
-		   body: String)
-{
-  override def toString() : String = {
-    return (contentType.toString() + "\n" +
-            additionalHeaders.mkString("\n") + "\n" +
-            body);
+    handlers find {case (r, handler) => this.scriptName matches r} match {
+      case Some((r, handler)) => return handler(this);
+      case None => return new HTTPResponse(
+        HTMLMIME,
+	    Array(HTTPStatusHeader(HTTP404Status)),
+        "");
+    }
   }
 }
 

@@ -2,9 +2,9 @@ object BlogApp extends FCGIHandler {
   def main(args: Array[String]) = {
     init();
     for(req <- get_request()) {
-      val response = req dispatch {
-        case "/index" => index
-      }
+      val response = req dispatch Map(
+	"/(index)?" -> index
+      )
       System.out.println(response);
     }
   }
