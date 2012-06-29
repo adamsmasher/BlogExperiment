@@ -1,3 +1,4 @@
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.postgresql.util.PSQLState;
 
@@ -6,6 +7,9 @@ object BlogApp extends FCGIHandler {
   val db = DB.connect();
   val findPostSQL = db.prepareStatement(
     "SELECT * FROM post WHERE id = ?");
+  val findPostListSQL = db.prepareStatement(
+    "SELECT * FROM post ORDER BY timestamp DESC LIMIT 10 OFFSET ?"
+  );
   def main(args: Array[String]) = {
     for(req <- get_request()) {
       val response = req dispatch Map(
@@ -17,12 +21,24 @@ object BlogApp extends FCGIHandler {
   }
 
   def index(req: FCGIRequest): HTTPResponse = {
-    val name = req.fields.getOrElse("name", "World");
+    val pageNum = (for {
+      pageNumStr <- req.fields.get("page")
+      pageNum <- IntUtil.toInt(pageNumStr)
+    } yield pageNum) match {
+      case Some(pageNum) => pageNum
+      case None => 0
+    }
+
+    val results = findPostList(pageNum);
+    val builder = new StringBuilder();
+    while(results.next()) {
+      builder.append("<LI>"+results.getString("title")+"</LI>");
+    }
 
     return new HTTPResponse(
       HTMLMIME,
       Array(),
-      "<HTML>Hello "+name+"!</HTML>");
+      "<HTML>Hello World!<UL>"+builder+"</UL></HTML>");
   }
 
   def post(req: FCGIRequest): HTTPResponse = {
@@ -59,6 +75,11 @@ object BlogApp extends FCGIHandler {
 	}
       }
     }
+  }
+
+  def findPostList(page:Int) : ResultSet = {
+    findPostListSQL.setInt(1, page * 10);
+    return findPostListSQL.executeQuery();
   }
 
   def postNotFound() : HTTPResponse = {
