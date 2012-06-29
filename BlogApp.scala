@@ -1,5 +1,11 @@
+import java.sql.SQLException;
+import org.postgresql.util.PSQLState;
+
 object BlogApp extends FCGIHandler {
   val log = System.err;
+  val db = DB.connect();
+  val findPostSQL = db.prepareStatement(
+    "SELECT * FROM post WHERE id = ?");
   def main(args: Array[String]) = {
     for(req <- get_request()) {
       val response = req dispatch Map(
@@ -20,21 +26,39 @@ object BlogApp extends FCGIHandler {
   }
 
   def post(req: FCGIRequest): HTTPResponse = {
-    val postId = for {
+    val post = for {
       postIdStr <- req.fields.get("id")
       postId <- IntUtil.toInt(postIdStr)
-    } yield postId;
-    return postId match {
-      case Some(id) => postResponse(id)
-      case None     => postNotFound()
+      post <- findPost(postId)
+    } yield post;
+    return post match {
+      case Some(post) => postResponse(post)
+      case None       => postNotFound()
     };
   }
 
-  def postResponse(id:Int) : HTTPResponse = {
-    return new HTTPResponse(
-      HTMLMIME,
-      Array(),
-      "<HTML>Post no "+id+" goes here.");
+  def findPost(id:Int) : Option[Post] = {
+    findPostSQL.setInt(1, id);
+    try {
+      val row = findPostSQL.executeQuery();
+      row.next();
+      return Some(Post.fromRow(row));
+    } catch {
+      case e:SQLException => {
+	// The cursor will be in an invalid state after next()
+	// if the result set is empty
+	if(e.getSQLState() equals
+	   PSQLState.INVALID_CURSOR_STATE.getState())
+	{
+	  return None;
+	}
+	else {
+	  log.println(e.getSQLState());
+	  log.println(e);
+	  throw e;
+	}
+      }
+    }
   }
 
   def postNotFound() : HTTPResponse = {
@@ -42,6 +66,14 @@ object BlogApp extends FCGIHandler {
       HTMLMIME,
       Array(),
       "<HTML>Not found.</HTML>");
+  }
+
+  def postResponse(post:Post) : HTTPResponse = {
+    return new HTTPResponse(
+      HTMLMIME,
+      Array(),
+      "<HTML><H1>"+post.title+"</H1><H2>"+post.timestamp+"</H2>" +
+	post.contents+"</HTML>");
   }
 }
 
