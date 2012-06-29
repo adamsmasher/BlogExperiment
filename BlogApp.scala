@@ -2,8 +2,8 @@ object BlogApp extends FCGIHandler {
   def main(args: Array[String]) = {
     for(req <- get_request()) {
       val response = req dispatch Map(
-	"/(index)?" -> index,
-	"/post" -> post
+        "/(index)?" -> index,
+        "/post" -> post
       )
       System.out.println(response);
     }
