@@ -2,7 +2,8 @@ object BlogApp extends FCGIHandler {
   def main(args: Array[String]) = {
     for(req <- get_request()) {
       val response = req dispatch Map(
-	"/(index)?" -> index
+	"/(index)?" -> index,
+	"/post" -> post
       )
       System.out.println(response);
     }
@@ -15,6 +16,31 @@ object BlogApp extends FCGIHandler {
       HTMLMIME,
       Array(),
       "<HTML>Hello "+name+"!</HTML>");
+  }
+
+  def post(req: FCGIRequest): HTTPResponse = {
+    val postId = for {
+      postIdStr <- req.fields.get("id")
+      postId <- IntUtil.toInt(postIdStr)
+    } yield postId;
+    return postId match {
+      case Some(id) => postResponse(id)
+      case None     => postNotFound()
+    };
+  }
+
+  def postResponse(id:Int) : HTTPResponse = {
+    return new HTTPResponse(
+      HTMLMIME,
+      Array(),
+      "<HTML>Post no "+id+" goes here.");
+  }
+
+  def postNotFound() : HTTPResponse = {
+    return new HTTPResponse(
+      HTMLMIME,
+      Array(),
+      "<HTML>Not found.</HTML>");
   }
 }
 
