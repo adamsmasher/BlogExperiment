@@ -10,10 +10,12 @@ object BlogApp extends FCGIHandler {
   }
 
   def index(req: FCGIRequest): HTTPResponse = {
+    val name = req.fields.getOrElse("name", "World");
+
     return new HTTPResponse(
       HTMLMIME,
       Array(),
-      "<HTML>Hello World!</HTML>");
+      "<HTML>Hello "+name+"!</HTML>");
   }
 
   def init() = {}

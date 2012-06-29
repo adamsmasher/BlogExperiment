@@ -17,7 +17,8 @@ trait FCGIHandler {
           HTTPRequestMethodParser.fromString(
             System.getProperty("REQUEST_METHOD")),
             System.getProperty("SCRIPT_NAME"),
-            parseQueryString(System.getProperty("QUERY_STRING")));
+            QueryString.parseQueryString(
+              System.getProperty("QUERY_STRING")));
         accepted = false;
         return req;
       }
@@ -37,15 +38,11 @@ trait FCGIHandler {
       }
     }
   }
-
-  def parseQueryString(qs: String) : Map[String, String] = {
-    return new HashMap();
-  }
 }
 
 class FCGIRequest(requestMethod:HTTPRequestMethod,
                   scriptName:String,
-                  queryString:Map[String, String]) {
+                  val fields:Map[String, String]) {
   def dispatch(handlers: Map[String, FCGIRequest => HTTPResponse])
     : HTTPResponse =
   {
