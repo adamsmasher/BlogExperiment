@@ -1,4 +1,5 @@
 object BlogApp extends FCGIHandler {
+  val log = System.err;
   def main(args: Array[String]) = {
     for(req <- get_request()) {
       val response = req dispatch Map(
