@@ -1,5 +1,6 @@
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import scala.reflect.BeanProperty;
 
 object Post {
   def fromRow(row:ResultSet) : Post = {
@@ -10,8 +11,8 @@ object Post {
   }
 }
 
-class Post(val title: String,
-	   val contents: String,
-	   val timestamp: Timestamp)
+class Post(@BeanProperty val title: String,
+	   @BeanProperty val contents: String,
+	   @BeanProperty val timestamp: Timestamp)
 {
 }

@@ -1,6 +1,7 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.postgresql.util.PSQLState;
+import org.stringtemplate.v4._;
 
 object BlogApp extends FCGIHandler {
   val log = System.err;
@@ -29,16 +30,16 @@ object BlogApp extends FCGIHandler {
       case None => 0
     }
 
+    val template = new STGroupDir("templates", '$', '$').getInstanceOf("index");
     val results = findPostList(pageNum);
-    val builder = new StringBuilder();
     while(results.next()) {
-      builder.append("<LI>"+results.getString("title")+"</LI>");
+      template.add("posts", Post.fromRow(results));
     }
 
     return new HTTPResponse(
       HTMLMIME,
       Array(),
-      "<HTML>Hello World!<UL>"+builder+"</UL></HTML>");
+      template.render());
   }
 
   def post(req: FCGIRequest): HTTPResponse = {
