@@ -31,6 +31,9 @@ object BlogApp extends FCGIHandler {
     }
 
     val template = new STGroupDir("templates", '$', '$').getInstanceOf("index");
+
+    template.add("next_page", pageNum + 1);
+
     val results = findPostList(pageNum);
     while(results.next()) {
       template.add("posts", Post.fromRow(results));
