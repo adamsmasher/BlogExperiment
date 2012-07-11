@@ -11,6 +11,8 @@ object BlogApp extends FCGIHandler {
   val findPostListSQL = db.prepareStatement(
     "SELECT * FROM post ORDER BY timestamp DESC LIMIT 10 OFFSET ?"
   );
+  val postCountSQL = db.prepareStatement(
+    "SELECT count(*) count FROM post");
   def main(args: Array[String]) = {
     for(req <- get_request()) {
       val response = req dispatch Map(
@@ -32,7 +34,7 @@ object BlogApp extends FCGIHandler {
 
     val template = new STGroupDir("templates", '$', '$').getInstanceOf("index");
 
-    template.add("next_page", pageNum + 1);
+    template.add("next_page", nextPage(pageNum).orNull);
 
     val results = findPostList(pageNum);
     while(results.next()) {
@@ -43,6 +45,16 @@ object BlogApp extends FCGIHandler {
       HTMLMIME,
       Array(),
       template.render());
+  }
+
+  def nextPage(currentPage: Int): Option[Int] = {
+    val postCount = getPostCount();
+    // return the next page number only if there are more pages
+    // to display
+    if(currentPage * 10 + 10 > postCount)
+      return None;
+    else
+      return Some(currentPage + 1);
   }
 
   def post(req: FCGIRequest): HTTPResponse = {
@@ -84,6 +96,12 @@ object BlogApp extends FCGIHandler {
   def findPostList(page:Int) : ResultSet = {
     findPostListSQL.setInt(1, page * 10);
     return findPostListSQL.executeQuery();
+  }
+
+  def getPostCount() : Int = {
+    val row = postCountSQL.executeQuery();
+    row.next();
+    return row.getInt("count");
   }
 
   def postNotFound() : HTTPResponse = {
