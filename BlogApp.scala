@@ -35,6 +35,7 @@ object BlogApp extends FCGIHandler {
     val template = new STGroupDir("templates", '$', '$').getInstanceOf("index");
 
     template.add("next_page", nextPage(pageNum).orNull);
+    template.add("previous_page", previousPage(pageNum).orNull);
 
     val results = findPostList(pageNum);
     while(results.next()) {
@@ -55,6 +56,13 @@ object BlogApp extends FCGIHandler {
       return None;
     else
       return Some(currentPage + 1);
+  }
+
+  def previousPage(currentPage: Int): Option[Int] = {
+    if(currentPage > 0)
+      return Some(currentPage - 1);
+    else
+      return None;
   }
 
   def post(req: FCGIRequest): HTTPResponse = {
