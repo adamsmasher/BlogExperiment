@@ -1,7 +1,6 @@
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.postgresql.util.PSQLState;
-import org.stringtemplate.v4.STGroupDir;
 
 class PostPage(db: Connection) {
   val findPostSQL = db.prepareStatement(

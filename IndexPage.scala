@@ -1,6 +1,5 @@
 import java.sql.Connection;
 import java.sql.ResultSet;
-import org.stringtemplate.v4.STGroupDir;
 
 class IndexPage(db: Connection) {
   val findPostListSQL = db.prepareStatement(
