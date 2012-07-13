@@ -1,6 +1,7 @@
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.postgresql.util.PSQLState;
+import org.stringtemplate.v4.STGroupDir;
 
 class PostPage(db: Connection) {
   val findPostSQL = db.prepareStatement(
@@ -50,10 +51,13 @@ class PostPage(db: Connection) {
   }
 
   def postResponse(post:Post) : HTTPResponse = {
+    val template = new STGroupDir("templates", '$', '$').getInstanceOf("post");
+
+    template.add("post", post);
+
     return new HTTPResponse(
       HTMLMIME,
       Array(),
-      "<HTML><H1>"+post.title+"</H1><H2>"+post.timestamp+"</H2>" +
-	post.contents+"</HTML>");
+      template.render());
   }
 }
