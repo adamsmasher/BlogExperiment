@@ -51,7 +51,7 @@ class PostPage(db: Connection) {
   }
 
   def postResponse(post:Post) : HTTPResponse = {
-    val template = new STGroupDir("templates", '$', '$').getInstanceOf("post");
+    val template = Templates.get("post");
 
     template.add("post", post);
 

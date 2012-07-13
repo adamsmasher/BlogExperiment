@@ -18,7 +18,7 @@ class IndexPage(db: Connection) {
       case None => 0
     }
 
-    val template = new STGroupDir("templates", '$', '$').getInstanceOf("index");
+    val template = Templates.get("index");
 
     template.add("next_page", nextPage(pageNum).orNull);
     template.add("previous_page", previousPage(pageNum).orNull);
