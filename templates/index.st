@@ -4,7 +4,7 @@ index(posts, next_page, previous_page) ::= <<
     <title>blog</title>
   </head>
   <body>
-    $posts:post()$
+    $posts:post_body()$
     <p>
       $if(previous_page)$<a href="index?page=$previous_page$">Previous</a>$endif$
       $if(next_page)$<a href="index?page=$next_page$">Next</a>$endif$
