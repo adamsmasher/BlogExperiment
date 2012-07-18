@@ -24,8 +24,8 @@ class IndexPage(db: Connection) {
       pageNumStr <- req.fields.get("page")
       pageNum <- IntUtil.toInt(pageNumStr)
     } yield pageNum) match {
-      case Some(pageNum) => pageNum
-      case None => 0
+      case Some(pageNum) => if(pageNum < 1) 1 else pageNum
+      case None => 1
     }
 
     val template = Templates.get("index");
@@ -48,21 +48,21 @@ class IndexPage(db: Connection) {
     val postCount = getPostCount();
     // return the next page number only if there are more pages
     // to display
-    if(currentPage * 10 + 10 > postCount)
+    if(currentPage * 10 >= postCount)
       return None;
     else
       return Some(currentPage + 1);
   }
 
   def previousPage(currentPage: Int): Option[Int] = {
-    if(currentPage > 0)
+    if(currentPage > 1)
       return Some(currentPage - 1);
     else
       return None;
   }
 
   def findPostList(page:Int) : ResultSet = {
-    findPostListSQL.setInt(1, page * 10);
+    findPostListSQL.setInt(1, (page - 1) * 10);
     return findPostListSQL.executeQuery();
   }
 
