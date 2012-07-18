@@ -1,10 +1,21 @@
 import java.sql.Connection;
 import java.sql.ResultSet;
+import scala.reflect.BeanProperty;
 
 class IndexPage(db: Connection) {
   val findPostListSQL = db.prepareStatement(
-    "SELECT * FROM post ORDER BY timestamp DESC LIMIT 10 OFFSET ?"
-  );
+    """SELECT post.id, post.title, post.timestamp, post.contents,
+              coalesce(comment_subquery.c, 0) as comment_count
+       FROM post LEFT JOIN (
+            SELECT comment.post_id id, count(*) c FROM comment, post
+            WHERE post.id = comment.post_id
+            GROUP BY comment.post_id)
+       AS comment_subquery
+       ON comment_subquery.id = post.id
+       ORDER BY post.timestamp DESC
+       LIMIT 10
+       OFFSET ?""");
+     
   val postCountSQL = db.prepareStatement(
     "SELECT count(*) count FROM post");
 
@@ -24,7 +35,7 @@ class IndexPage(db: Connection) {
 
     val results = findPostList(pageNum);
     while(results.next()) {
-      template.add("posts", Post.fromRow(results));
+      template.add("entries", IndexEntry.fromRow(results));
     }
 
     return new HTTPResponse(
@@ -60,4 +71,17 @@ class IndexPage(db: Connection) {
     row.next();
     return row.getInt("count");
   }
+}
+
+object IndexEntry {
+    def fromRow(row:ResultSet) : IndexEntry = {
+        return new IndexEntry(
+            Post.fromRow(row),
+            row.getInt("comment_count"));
+    }
+}
+
+class IndexEntry(@BeanProperty val post:Post,
+                 @BeanProperty val commentCount:Int)
+{
 }
