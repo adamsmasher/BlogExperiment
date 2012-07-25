@@ -14,7 +14,7 @@ object Post {
 
 class Post(@BeanProperty val id: Int,
            @BeanProperty val title: String,
-	   @BeanProperty val contents: String,
-	   @BeanProperty val timestamp: Timestamp)
+           @BeanProperty val contents: String,
+           @BeanProperty val timestamp: Timestamp)
 {
 }
