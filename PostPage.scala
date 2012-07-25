@@ -5,6 +5,8 @@ import org.postgresql.util.PSQLState;
 class PostPage(db: Connection) {
   val findPostSQL = db.prepareStatement(
     "SELECT * FROM post WHERE id = ?");
+  val findCommentsSQL = db.prepareStatement(
+    "SELECT * FROM comment WHERE post_id = ? ORDER BY timestamp");
   
   def post(req: FCGIRequest): HTTPResponse = {
     val post = for {
@@ -51,12 +53,25 @@ class PostPage(db: Connection) {
 
   def postResponse(post:Post) : HTTPResponse = {
     val template = Templates.get("post");
+    val comments = getComments(post);
 
     template.add("post", post);
+    for(comment <- comments)
+        template.add("comments", comment);
 
     return new HTTPResponse(
       HTMLMIME,
       Array(),
       template.render());
+  }
+
+  def getComments(post:Post) : List[Comment] = {
+    findCommentsSQL.setInt(1, post.id);
+    val row = findCommentsSQL.executeQuery();
+    var comments = List() : List[Comment];
+    while(row.next()) {
+        comments = Comment.fromRow(row) +: comments;
+    }
+    return comments;
   }
 }
