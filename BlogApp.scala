@@ -1,5 +1,3 @@
-import org.stringtemplate.v4._;
-
 object BlogApp extends FCGIHandler {
   val log = System.err;
   val db = DB.connect();

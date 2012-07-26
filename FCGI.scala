@@ -1,5 +1,4 @@
 import com.fastcgi;
-import scala.collection.immutable.HashMap;
 
 trait FCGIHandler {
   def get_request() : Iterator[FCGIRequest] = {

@@ -1,6 +1,5 @@
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.postgresql.util.PSQLState;
 
 class PostCommentAction(db: Connection) {
   var postCommentSQL = db.prepareStatement(
