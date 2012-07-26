@@ -11,7 +11,7 @@ class AdminPage(db: Connection) {
   def admin(req: FCGIRequest): HTTPResponse = {
     val template = Templates.get("admin");
 
-    val results = findPostList();
+    val results = findPostListSQL.executeQuery();
     while(results.next()) {
       template.add("entries", AdminEntry.fromRow(results));
     }
@@ -20,10 +20,6 @@ class AdminPage(db: Connection) {
       HTMLMIME,
       Array(),
       template.render());
-  }
-
-  def findPostList() : ResultSet = {
-    return findPostListSQL.executeQuery();
   }
 
   object AdminEntry {

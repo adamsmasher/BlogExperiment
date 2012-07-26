@@ -4,18 +4,18 @@ import org.postgresql.util.PSQLState;
 import scala.reflect.BeanProperty;
 
 class DeletePostPage(db: Connection) {
-  val getPostInfoSQL = db.prepareStatement(
+  val getPostTitleSQL = db.prepareStatement(
     "SELECT title FROM post WHERE id = ?");
   
   def confirm(req: FCGIRequest): HTTPResponse = {
     val postInfo = for {
       postIdStr <- req.fields.get("id")
       postId <- IntUtil.toInt(postIdStr)
-      postInfo <- getPostInfo(postId)
-    } yield postInfo;
+      postTitle <- getPostTitle(postId)
+    } yield (postId, postTitle);
     return postInfo match {
-      case Some(postInfo) => confirmResponse(postInfo)
-      case None           => badRequest()
+      case Some((postId, postTitle)) => confirmResponse(postId, postTitle)
+      case None                    => badRequest()
     };
   }
 
@@ -26,11 +26,11 @@ class DeletePostPage(db: Connection) {
       "<HTML>Bad request.</HTML>");
   }
 
-  def confirmResponse(postInfo:PostInfo) : HTTPResponse = {
+  def confirmResponse(postId:Int, postTitle:String) : HTTPResponse = {
     val template = Templates.get("delete_post");
     
-    template.add("id", postInfo.id);
-    template.add("title", postInfo.title);
+    template.add("id", postId);
+    template.add("title", postTitle);
 
     return new HTTPResponse(
       HTMLMIME,
@@ -38,12 +38,12 @@ class DeletePostPage(db: Connection) {
       template.render());
   }
 
-  def getPostInfo(postId:Int) : Option[PostInfo] = {
-    getPostInfoSQL.setInt(1, postId);
+  def getPostTitle(postId:Int) : Option[String] = {
+    getPostTitleSQL.setInt(1, postId);
     try {
-      val row = getPostInfoSQL.executeQuery();
+      val row = getPostTitleSQL.executeQuery();
       row.next();
-      return Some(new PostInfo(postId, row.getString("title")));
+      return Some(row.getString("title"));
     } catch {
       case e:SQLException => {
         // The cursor will be in an invalid state after next()
@@ -60,9 +60,4 @@ class DeletePostPage(db: Connection) {
       }
     }
   }
-
-  class PostInfo(@BeanProperty val id:Int, @BeanProperty val title:String) {
-  }
 }
-
-
