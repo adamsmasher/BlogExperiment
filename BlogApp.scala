@@ -7,13 +7,15 @@ object BlogApp extends FCGIHandler {
   val indexPage = new IndexPage(db);
   val postPage = new PostPage(db);
   val postCommentAction = new PostCommentAction(db);
+  val adminPage = new AdminPage(db);
 
   def main(args: Array[String]) = {
     for(req <- get_request()) {
       val response = req dispatch Map(
         "/(index)?" -> indexPage.index,
         "/post" -> postPage.post,
-        "/post_comment" -> postCommentAction.postComment
+        "/post_comment" -> postCommentAction.postComment,
+        "/admin" -> adminPage.admin
       )
       System.out.println(response);
     }
