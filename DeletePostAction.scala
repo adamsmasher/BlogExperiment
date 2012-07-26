@@ -13,13 +13,6 @@ class DeletePostAction(db: Connection) {
     };
   }
 
-  def redirectToAdmin() : HTTPResponse = {
-    return new HTTPResponse(
-      HTMLMIME,
-      Array(),
-      "<HTML>Redirect.</HTML>");
-  }
-
   def doDeletePost(postId: Int) : HTTPResponse =
   {
     db.setAutoCommit(false);
@@ -33,6 +26,6 @@ class DeletePostAction(db: Connection) {
     db.commit();
     db.setAutoCommit(true);
 
-    return redirectToAdmin();
+    return HTTPResponse.seeOther("/admin");
   }
 }

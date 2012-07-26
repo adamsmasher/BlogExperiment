@@ -23,13 +23,6 @@ class PostCommentAction(db: Connection) {
     };
   }
 
-  def redirectToPost(postId: Int) : HTTPResponse = {
-    return new HTTPResponse(
-      HTMLMIME,
-      Array(),
-      "<HTML>Redirect.</HTML>");
-  }
-
   def doPostComment(postId: Int, commentTitle: String, commentBody: String) :
     HTTPResponse =
   {
@@ -46,6 +39,6 @@ class PostCommentAction(db: Connection) {
       }
     }
 
-    return redirectToPost(postId);
+    return HTTPResponse.seeOther("/post?id="+postId);
   }
 }

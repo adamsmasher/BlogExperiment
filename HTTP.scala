@@ -1,3 +1,13 @@
+object HTTPResponse {
+  def seeOther(url: String) : HTTPResponse = {
+    return new HTTPResponse(
+      HTMLMIME,
+      Array(
+        HTTPStatusHeader(HTTP303Status),
+        HTTPLocationHeader(url)), "");
+  }
+}
+
 class HTTPResponse(contentType: MIMEType,
 		   additionalHeaders: Array[HTTPHeader],
 		   body: String)
@@ -25,6 +35,9 @@ case class HTTPStatusHeader(status: HTTPStatus)
 }
 
 abstract class HTTPStatus;
+case object HTTP303Status extends HTTPStatus {
+  override def toString() : String = { return "303 See Other"; }
+}
 case object HTTP404Status extends HTTPStatus {
   override def toString() : String = { return "404 Not Found"; }
 }
@@ -39,6 +52,11 @@ case class HTTPContentTypeHeader(contentType: MIMEType)
   override def value() : String = {
     return contentType.toString();
   }
+}
+
+case class HTTPLocationHeader(url: String) extends HTTPHeader {
+  override def name() : String = { return "Location"; }
+  override def value() : String = { return url; }
 }
 
 abstract class HTTPRequestMethod;
