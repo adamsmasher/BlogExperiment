@@ -1,6 +1,4 @@
 import java.sql.Connection;
-import java.sql.SQLException;
-import org.postgresql.util.PSQLState;
 
 class PostPage(db: Connection) {
   val findPostSQL = db.prepareStatement(
@@ -22,26 +20,9 @@ class PostPage(db: Connection) {
 
   def findPost(id:Int) : Option[Post] = {
     findPostSQL.setInt(1, id);
-    try {
-      val row = findPostSQL.executeQuery();
-      row.next();
-      return Some(Post.fromRow(row));
-    } catch {
-      case e:SQLException => {
-	// The cursor will be in an invalid state after next()
-	// if the result set is empty
-	if(e.getSQLState() equals
-	   PSQLState.INVALID_CURSOR_STATE.getState())
-	{
-	  return None;
-	}
-	else {
-	  BlogApp.log.println(e.getSQLState());
-	  BlogApp.log.println(e);
-	  throw e;
-	}
-      }
-    }
+    return for {
+      row <- DB.executeQueryNonEmpty(findPostSQL)
+    } yield Post.fromRow(row)
   }
 
   def postNotFound() : HTTPResponse = {

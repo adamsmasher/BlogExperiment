@@ -1,6 +1,4 @@
 import java.sql.Connection;
-import java.sql.SQLException;
-import org.postgresql.util.PSQLState;
 import scala.reflect.BeanProperty;
 
 class DeletePostPage(db: Connection) {
@@ -40,24 +38,8 @@ class DeletePostPage(db: Connection) {
 
   def getPostTitle(postId:Int) : Option[String] = {
     getPostTitleSQL.setInt(1, postId);
-    try {
-      val row = getPostTitleSQL.executeQuery();
-      row.next();
-      return Some(row.getString("title"));
-    } catch {
-      case e:SQLException => {
-        // The cursor will be in an invalid state after next()
-        // if the result set is empty
-        if(e.getSQLState() equals PSQLState.INVALID_CURSOR_STATE.getState())
-        {
-          return None;
-        }
-        else {
-          BlogApp.log.println(e.getSQLState());
-          BlogApp.log.println(e);
-          throw e;
-        }
-      }
-    }
+    return for {
+      row <- DB.executeQueryNonEmpty(getPostTitleSQL)
+    } yield row.getString("title");
   }
 }

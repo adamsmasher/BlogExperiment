@@ -1,5 +1,9 @@
 import java.sql.DriverManager;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import org.postgresql.util.PSQLState;
 
 object DB {
   def connect() : Connection = {
@@ -10,5 +14,25 @@ object DB {
     return DriverManager.getConnection(
       "jbdc:postgresql://localhost:"+port+"/blog",
       username, password);
+  }
+
+  def executeQueryNonEmpty(stmt: PreparedStatement) : Option[ResultSet] = {
+    try {
+      val row = stmt.executeQuery();
+      row.next();
+      return Some(row);
+    } catch {
+      case e:SQLException => {
+        // The cursor will be in an invalid state after next() if the result set
+        // is empty
+        if(e.getSQLState() equals PSQLState.INVALID_CURSOR_STATE.getState())
+        {
+          return None;
+        }
+        else {
+          throw e;
+        }
+      }
+    }
   }
 }
