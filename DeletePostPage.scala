@@ -60,8 +60,9 @@ class DeletePostPage(db: Connection) {
       }
     }
   }
+
+  class PostInfo(@BeanProperty val id:Int, @BeanProperty val title:String) {
+  }
 }
 
 
-class PostInfo(@BeanProperty val id:Int, @BeanProperty val title:String) {
-}

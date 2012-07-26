@@ -71,17 +71,19 @@ class IndexPage(db: Connection) {
     row.next();
     return row.getInt("count");
   }
-}
 
-object IndexEntry {
+  object IndexEntry {
     def fromRow(row:ResultSet) : IndexEntry = {
         return new IndexEntry(
             Post.fromRow(row),
             row.getInt("comment_count"));
     }
+  }
+
+  class IndexEntry(@BeanProperty val post:Post,
+                   @BeanProperty val commentCount:Int)
+  {
+  }
 }
 
-class IndexEntry(@BeanProperty val post:Post,
-                 @BeanProperty val commentCount:Int)
-{
-}
+

@@ -25,19 +25,21 @@ class AdminPage(db: Connection) {
   def findPostList() : ResultSet = {
     return findPostListSQL.executeQuery();
   }
-}
 
-object AdminEntry {
+  object AdminEntry {
     def fromRow(row:ResultSet) : AdminEntry = {
         return new AdminEntry(
             row.getInt("id"),
             row.getString("title"),
             row.getTimestamp("timestamp"));
     }
+  }
+
+  class AdminEntry(@BeanProperty val id:Int,
+                   @BeanProperty val title:String,
+                   @BeanProperty val timestamp: Timestamp)
+  {
+  }
 }
 
-class AdminEntry(@BeanProperty val id:Int,
-                 @BeanProperty val title:String,
-                 @BeanProperty val timestamp: Timestamp)
-{
-}
+
