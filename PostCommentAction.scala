@@ -19,16 +19,8 @@ class PostCommentAction(db: Connection) {
     return params match {
       case Some((postId, commentTitle, commentBody)) =>
         doPostComment(postId, commentTitle, commentBody)
-      case None                                      => badRequest()
+      case None                                      => BlogApp.badRequest()
     };
-  }
-
-
-  def badRequest() : HTTPResponse = {
-    return new HTTPResponse(
-      HTMLMIME,
-      Array(),
-      "<HTML>Bad request.</HTML>");
   }
 
   def redirectToPost(postId: Int) : HTTPResponse = {
@@ -50,7 +42,7 @@ class PostCommentAction(db: Connection) {
       case e:SQLException => {
 	    BlogApp.log.println(e.getSQLState());
         BlogApp.log.println(e);
-        return badRequest();
+        return BlogApp.badRequest();
       }
     }
 

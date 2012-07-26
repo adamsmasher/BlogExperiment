@@ -9,15 +9,8 @@ class DeletePostAction(db: Connection) {
 
     return postId match {
       case Some(postId) => doDeletePost(postId);
-      case None         => badRequest();
+      case None         => BlogApp.badRequest();
     };
-  }
-
-  def badRequest() : HTTPResponse = {
-    return new HTTPResponse(
-      HTMLMIME,
-      Array(),
-      "<HTML>Bad request.</HTML>");
   }
 
   def redirectToAdmin() : HTTPResponse = {

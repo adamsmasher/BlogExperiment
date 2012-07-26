@@ -13,15 +13,8 @@ class DeletePostPage(db: Connection) {
     } yield (postId, postTitle);
     return postInfo match {
       case Some((postId, postTitle)) => confirmResponse(postId, postTitle)
-      case None                    => badRequest()
+      case None                      => BlogApp.badRequest()
     };
-  }
-
-  def badRequest() : HTTPResponse = {
-    return new HTTPResponse(
-      HTMLMIME,
-      Array(),
-      "<HTML>Bad request.</HTML>");
   }
 
   def confirmResponse(postId:Int, postTitle:String) : HTTPResponse = {

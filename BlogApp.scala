@@ -22,4 +22,11 @@ object BlogApp extends FCGIHandler {
       System.out.println(response);
     }
   }
+
+  def badRequest() : HTTPResponse = {
+    return new HTTPResponse(
+      HTMLMIME,
+      Array(),
+      "<HTML>Bad request.</HTML>");
+  }
 }
