@@ -57,7 +57,7 @@ class PostPage(db: Connection) {
 
     template.add("post", post);
     for(comment <- comments)
-        template.add("comments", comment);
+        template.add("comments", comment.escape());
 
     return new HTTPResponse(
       HTMLMIME,

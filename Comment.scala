@@ -1,6 +1,7 @@
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import scala.reflect.BeanProperty;
+import scala.xml.Utility;
 
 object Comment {
   def fromRow(row:ResultSet) : Comment = {
@@ -17,4 +18,11 @@ class Comment(@BeanProperty val id: Int,
               @BeanProperty val contents: String,
               @BeanProperty val timestamp: Timestamp)
 {
+  def escape() : Comment = {
+    return new Comment(
+      id,
+      scala.xml.Utility.escape(title),
+      scala.xml.Utility.escape(contents),
+      timestamp);
+  }
 }
