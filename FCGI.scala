@@ -17,7 +17,7 @@ trait FCGIHandler {
           HTTPRequestMethodParser.fromString(
             System.getProperty("REQUEST_METHOD")),
             System.getProperty("SCRIPT_NAME"),
-            QueryString.parseQueryString(
+            FormEncoding.parseFormEncoded(
               System.getProperty("QUERY_STRING")));
         accepted = false;
         return req;

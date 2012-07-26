@@ -1,5 +1,5 @@
-object QueryString {
-  def parseQueryString(qs:String) : Map[String, String] = {
+object FormEncoding {
+  def parseFormEncoded(qs:String) : Map[String, String] = {
     return Map {
       qs split '&' map {
         (s:String) => s.splitAt(s indexOf '=') match {

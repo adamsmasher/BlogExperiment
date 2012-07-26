@@ -7,7 +7,7 @@ class PostCommentAction(db: Connection) {
     "INSERT INTO comment (post_id, title, contents) VALUES (?, ?, ?)");
 
   def postComment(req: FCGIRequest): HTTPResponse = {
-    val bodyFields = QueryString.parseQueryString(new String(req.slurpBody()));
+    val bodyFields = FormEncoding.parseFormEncoded(new String(req.slurpBody()));
 
     val params = for { 
       postIdStr <- req.fields.get("post_id")
