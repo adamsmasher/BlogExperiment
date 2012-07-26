@@ -1,0 +1,59 @@
+import java.sql.Connection;
+import java.sql.SQLException;
+import org.postgresql.util.PSQLState;
+
+class PostCommentAction(db: Connection) {
+  var postCommentSQL = db.prepareStatement(
+    "INSERT INTO comment (post_id, title, contents) VALUES (?, ?, ?)");
+
+  def postComment(req: FCGIRequest): HTTPResponse = {
+    val bodyFields = QueryString.parseQueryString(new String(req.slurpBody()));
+
+    val params = for { 
+      postIdStr <- req.fields.get("post_id")
+      postId <- IntUtil.toInt(postIdStr)
+      commentTitle <- bodyFields.get("comment_title")
+      commentBody <- bodyFields.get("comment_body")
+    } yield (postId, commentTitle, commentBody);
+
+    return params match {
+      case Some((postId, commentTitle, commentBody)) =>
+        doPostComment(postId, commentTitle, commentBody)
+      case None                                      => badRequest()
+    };
+  }
+
+
+  def badRequest() : HTTPResponse = {
+    return new HTTPResponse(
+      HTMLMIME,
+      Array(),
+      "<HTML>Bad request.</HTML>");
+  }
+
+  def redirectToPost(postId: Int) : HTTPResponse = {
+    return new HTTPResponse(
+      HTMLMIME,
+      Array(),
+      "<HTML>Redirect.</HTML>");
+  }
+
+  def doPostComment(postId: Int, commentTitle: String, commentBody: String) :
+    HTTPResponse =
+  {
+    postCommentSQL.setInt(1, postId);
+    postCommentSQL.setString(2, commentTitle);
+    postCommentSQL.setString(3, commentBody);
+    try {
+        postCommentSQL.executeUpdate();
+    } catch {
+      case e:SQLException => {
+	    BlogApp.log.println(e.getSQLState());
+        BlogApp.log.println(e);
+        return badRequest();
+      }
+    }
+
+    return redirectToPost(postId);
+  }
+}

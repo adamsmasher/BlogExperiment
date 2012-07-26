@@ -72,6 +72,11 @@ case object JavascriptMIME extends MIMEType {
 case object XMLMime extends MIMEType {
   override def toString() : String = { return "text/xml"; }
 }
+case object FormURLEncodedMIME extends MIMEType {
+  override def toString() : String = {
+    return "application/x-www-form-urlencoded";
+  }
+}
 
 object MIMETypeParser {
   def fromString(s:String) : MIMEType = {
@@ -80,6 +85,7 @@ object MIMETypeParser {
       case "text/html" => HTMLMIME;
       case "application/javascript" => JavascriptMIME;
       case "text/xml" => XMLMime;
+      case "application/x-www-form-urlencoded" => FormURLEncodedMIME;
     }
   }
 }

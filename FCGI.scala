@@ -54,5 +54,15 @@ class FCGIRequest(requestMethod:HTTPRequestMethod,
         "");
     }
   }
+
+  def slurpBody() : Array[Byte] = {
+    return requestMethod match {
+      case GETMethod => return new Array(0);
+      case POSTMethod(contentType, contentLength) =>
+        val bodyBytes = new Array(contentLength) : Array[Byte];
+        System.in.read(bodyBytes, 0, contentLength);
+        return bodyBytes;
+    }
+  }
 }
 
